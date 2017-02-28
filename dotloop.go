@@ -71,6 +71,7 @@ func (dl *Dotloop) url(path string) string {
 type Loop struct {
 	Name            string        `json:"name"`
 	ProfileID       int           `json:"profile_id,omitempty"`
+	TemplateID      int           `json:"templateId,omitempty"`
 	TransactionType string        `json:"transactionType"`
 	Status          string        `json:"status"`
 	Participants    []Participant `json:"participants,omitempty"`
