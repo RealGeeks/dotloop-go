@@ -70,9 +70,20 @@ func (dl *Dotloop) url(path string) string {
 
 type Loop struct {
 	Name            string        `json:"name"`
+	ProfileID       int           `json:"profile_id,omitempty"`
 	TransactionType string        `json:"transactionType"`
 	Status          string        `json:"status"`
 	Participants    []Participant `json:"participants,omitempty"`
+	StreetName      string        `json:"streetName,omitempty"`
+	StreetNumber    string        `json:"streetNumber,omitempty"`
+	Unit            string        `json:"unit,omitempty"`
+	City            string        `json:"city,omitempty"`
+	State           string        `json:"state,omitempty"`
+	ZipCode         string        `json:"zipCode,omitempty"`
+	County          string        `json:"county,omitempty"`
+	Country         string        `json:"country,omitempty"`
+	MLSPropertyID   string        `json:"mlsPropertId,omitempty"`
+	MLSAgentID      string        `json:"mlsAgentId,omitempty"`
 }
 
 type Participant struct {
