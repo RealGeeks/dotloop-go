@@ -15,6 +15,16 @@ import (
 // DefaultURL for the API v2
 const DefaultURL = "https://api-gateway.dotloop.com/public/v2/"
 
+// ErrInvalid is returned on status code 400. Usually a validation error
+// like missing a required field
+type ErrInvalid struct {
+	Body string
+}
+
+func (e *ErrInvalid) Error() string {
+	return fmt.Sprintf("dotloop: invalid request %v", e.Body)
+}
+
 // Dotloop is the client to API v2
 //
 // https://dotloop.github.io/public-api/
@@ -46,6 +56,9 @@ func (dl *Dotloop) LoopIt(loop Loop) error {
 	resbody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return fmt.Errorf("dotloop: reading response (%v)", err)
+	}
+	if res.StatusCode == 400 {
+		return &ErrInvalid{Body: string(resbody)}
 	}
 	if res.StatusCode != 201 {
 		return fmt.Errorf("dotloop: %v - %v", res.StatusCode, string(resbody))
