@@ -25,6 +25,15 @@ func (e *ErrInvalid) Error() string {
 	return fmt.Sprintf("dotloop: invalid request %v", e.Body)
 }
 
+// ErrInvalidToken is returned on status 401 when access token is invalid
+type ErrInvalidToken struct {
+	Msg string
+}
+
+func (e *ErrInvalidToken) Error() string {
+	return fmt.Sprintf("dotloop: %s", e.Msg)
+}
+
 // Dotloop is the client to API v2
 //
 // https://dotloop.github.io/public-api/
@@ -60,10 +69,27 @@ func (dl *Dotloop) LoopIt(loop Loop) error {
 	if res.StatusCode == 400 {
 		return &ErrInvalid{Body: string(resbody)}
 	}
+	if ok, err := isInvalidToken(res.StatusCode, resbody); ok {
+		return err
+	}
 	if res.StatusCode != 201 {
 		return fmt.Errorf("dotloop: %v - %v", res.StatusCode, string(resbody))
 	}
 	return nil
+}
+
+func isInvalidToken(code int, body []byte) (ok bool, err error) {
+	if code != 401 {
+		return false, nil
+	}
+	var data map[string]string
+	if err := json.Unmarshal(body, &data); err != nil {
+		return false, nil
+	}
+	if data["error"] != "invalid_token" {
+		return false, nil
+	}
+	return true, &ErrInvalidToken{Msg: "dotloop: " + data["error_description"]}
 }
 
 func (dl *Dotloop) http() *http.Client {
