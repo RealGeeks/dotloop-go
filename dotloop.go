@@ -18,11 +18,12 @@ const DefaultURL = "https://api-gateway.dotloop.com/public/v2/"
 // ErrInvalid is returned on status code 400. Usually a validation error
 // like missing a required field
 type ErrInvalid struct {
-	Body string
+	ReqBody, Method, URL string
+	ResBody              string
 }
 
 func (e *ErrInvalid) Error() string {
-	return fmt.Sprintf("dotloop: invalid request %v", e.Body)
+	return fmt.Sprintf("dotloop: %s %s %s returned 400 with body %s", e.Method, e.URL, e.ReqBody, e.ResBody)
 }
 
 // ErrInvalidToken is returned on status 401 when access token is invalid
@@ -67,7 +68,7 @@ func (dl *Dotloop) LoopIt(loop Loop) error {
 		return fmt.Errorf("dotloop: reading response (%v)", err)
 	}
 	if res.StatusCode == 400 {
-		return &ErrInvalid{Body: string(resbody)}
+		return &ErrInvalid{Method: "POST", URL: dl.url("loop-it"), ReqBody: string(reqbody), ResBody: string(resbody)}
 	}
 	if ok, err := isInvalidToken(res.StatusCode, resbody); ok {
 		return err
