@@ -52,7 +52,11 @@ func (dl *Dotloop) LoopIt(loop Loop) error {
 	if err != nil {
 		return fmt.Errorf("dotloop: encoding body (%v)", err)
 	}
-	req, err := http.NewRequest("POST", dl.url("loop-it"), bytes.NewReader(reqbody))
+	url := dl.url("loop-it")
+	if loop.ProfileID != 0 {
+		url = url + fmt.Sprintf("?profile_id=%d", loop.ProfileID)
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewReader(reqbody))
 	if err != nil {
 		return fmt.Errorf("dotloop: building request (%v)", err)
 	}
@@ -68,7 +72,7 @@ func (dl *Dotloop) LoopIt(loop Loop) error {
 		return fmt.Errorf("dotloop: reading response (%v)", err)
 	}
 	if res.StatusCode == 400 {
-		return &ErrInvalid{Method: "POST", URL: dl.url("loop-it"), ReqBody: string(reqbody), ResBody: string(resbody)}
+		return &ErrInvalid{Method: "POST", URL: url, ReqBody: string(reqbody), ResBody: string(resbody)}
 	}
 	if ok, err := isInvalidToken(res.StatusCode, resbody); ok {
 		return err
@@ -110,7 +114,7 @@ func (dl *Dotloop) url(path string) string {
 
 type Loop struct {
 	Name            string        `json:"name"`
-	ProfileID       int           `json:"profile_id,omitempty"`
+	ProfileID       int           `json:"-"`
 	TemplateID      int           `json:"templateId,omitempty"`
 	TransactionType string        `json:"transactionType"`
 	Status          string        `json:"status"`
