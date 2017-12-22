@@ -64,12 +64,12 @@ func (dl *Dotloop) LoopIt(loop Loop) error {
 	req.Header.Set("Authorization", "Bearer "+dl.Token)
 	res, err := dl.http().Do(req)
 	if err != nil {
-		return fmt.Errorf("dotloop: making request (%v)", err)
+		return fmt.Errorf("dotloop: making request (%v) POST %v %v", err, url, string(reqbody))
 	}
 	defer res.Body.Close()
 	resbody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return fmt.Errorf("dotloop: reading response (%v)", err)
+		return fmt.Errorf("dotloop: reading response (%v) POST %v %v", err, url, string(reqbody))
 	}
 	if res.StatusCode == 400 {
 		return &ErrInvalid{Method: "POST", URL: url, ReqBody: string(reqbody), ResBody: string(resbody)}
@@ -99,7 +99,7 @@ func isInvalidToken(code int, body []byte) (ok bool, err error) {
 
 func (dl *Dotloop) http() *http.Client {
 	if dl.HTTP == nil {
-		dl.HTTP = &http.Client{Timeout: 3 * time.Second}
+		dl.HTTP = &http.Client{Timeout: 6 * time.Second}
 	}
 	return dl.HTTP
 }
